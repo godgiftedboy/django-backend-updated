@@ -70,7 +70,13 @@ def predict_sentiment(request):
                 'Negative':str(negative_count),
                 'Neutral':str(neutral_count),
             })          
-        except json.JSONDecodeError:
-            return HttpResponse({'error': 'Invalid JSON data'}, status=400)
+        except json.JSONDecodeError:           
+            return JsonResponse({
+                    'status':False,
+                    'message': 'Invalid JSON data',                        
+                })
     else:
-        return HttpResponse({'error': 'Only POST requests are allowed'}, status=405)
+        return JsonResponse({
+                        'status':False,
+                        'message': 'Only POST requests are allowed',                        
+                    })
