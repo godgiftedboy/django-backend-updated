@@ -26,13 +26,12 @@
     </div>
     {% endfor %}
 
-    <h3>Welcome to setimento</h3>
+    <h3>Welcome to YT Comment Analytics</h3>
 
     {% if user.is_authenticated %}
 
     <h3>Hello {{fname}}</h3>
-    <h4>You are successfully logged in.</h4>
-    <button type="submit"><a href="/signout">SignOut</a></button>
+    <h4>You are account has been successfully verified.</h4>
 
     {% else %}
     <button type="submit"><a href="/signup">SignUp</a></button>

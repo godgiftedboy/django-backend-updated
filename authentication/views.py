@@ -19,34 +19,51 @@ from . tokens import generate_token
 def home(request):
     return render(request, "authentication/index.html")
 
-def signup(request):
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
 
-    if request.method == "POST":
-        # username=request.POST.get('username')
-        username=request.POST['username']
-        fname=request.POST['fname']
-        lname=request.POST['lname']
-        email=request.POST['email']
-        pass1=request.POST['pass1']
-        pass2=request.POST['pass2']
+@csrf_exempt
+def signup(request):
+    if request.method == "POST":          
+        data=json.loads(request.body) 
+        username=data.get('username','') 
+        fname=data.get('fname','') 
+        lname=data.get('lname','')         
+        email=data.get('email','')
+        pass1=data.get('pass1','')
+        pass2=data.get('pass2','')
 
         if User.objects.filter(username=username):
-            messages.error(request, "Username already exists! Please try some other username")
-            return redirect('home')
+            return JsonResponse({
+                'status':False,
+                'message': 'Username already exists!!',         
+            })
         
         if User.objects.filter(email=email):
-            messages.error(request, "Email already registered!")
-            return redirect('home')
+          
+            return JsonResponse({
+                'status':False,
+                'message': 'Email already registered!',         
+            })
         
         if len(username)>10:
-            messages.error(request, "Username must be under 10 characters")
+            return JsonResponse({
+                'status':False,
+                'message': "Username must be under 10 characters",         
+            })
 
         if pass1 != pass2:
-            messages.error(request, "Passwords didn't match!")
+            return JsonResponse({
+                'status':False,
+                'message': "Passwords didn't match!",         
+            })
 
         if not username.isalnum():
-            messages.error(request, "username must be Alpha-Numeric!")
-            return redirect('home')
+            return JsonResponse({
+                'status':False,
+                'message': "username must be Alpha-Numeric!",         
+            })
 
         myuser = User.objects.create_user(username, email, pass1)
         myuser.first_name = fname
@@ -55,10 +72,6 @@ def signup(request):
 
         myuser.save()
 
-        messages.success(request, "Your account has been successfully created. We have sent you a confirmation email, please confirm your email in order to activater your account.")
-
-        #welcome email
-        # send_mail.sendmail(myuser.email, "1234")
 
 
         subject = "Welcome to YTAnalytics -- Login!!"
@@ -85,32 +98,55 @@ def signup(request):
         email.fail_silently = False
         email.send()
 
-        return redirect('signin')
+        return JsonResponse({
+                'status':True,
+                'message': "Your account has been successfully created. We have sent you a confirmation email, please confirm your email in order to activate your account.",         
+            })
 
     return render(request, "authentication/signup.html")
 
+@csrf_exempt
 def signin(request):
 
     if request.method == "POST":
-        username=request.POST['username']
-        pass1=request.POST['pass1']
+        data=json.loads(request.body)
+        username =data.get('username','')
+        pass1 = data.get('pass1','')
     
         user=authenticate(username=username, password=pass1)
 
         if user is not None:
             login(request, user)
             fname = user.first_name
-            return render(request, "authentication/index.html", {'fname':fname})
+            response_data = {
+                'status':True,
+                'message': 'Logged in successfully',
+                'username': username,              
+            }
+            return JsonResponse(response_data)
+
 
         else:
-            messages.error(request, "Bad credentials!")
-            return redirect('home')
-    return render(request, "authentication/signin.html")
+            response_data = {
+                'status':False,
+                'message': 'Bad credentials!',
+                'username': username,              
+            }           
+            return JsonResponse(response_data)
+            
+        
+    return JsonResponse({
+                'status':False,
+                'message': 'Internal Server Error!',          
+            })
+    # return render(request, "authentication/signin.html")
 
 def signout(request):
     logout(request)
-    messages.success(request, "Logged Out Successfully!")
-    return redirect('home')
+    return JsonResponse({
+                'status':True,
+                'message': "Logged Out Successfully!"         
+            })
 
 
 def activate(request, uidb64, token):
