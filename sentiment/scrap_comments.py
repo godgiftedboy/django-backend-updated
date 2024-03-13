@@ -2,6 +2,7 @@ import googleapiclient.discovery
 import pandas as pd
 
 def scrap_comments(videoID):
+
     dev = "AIzaSyDBD2XxnPKGsYsoZ6RS0Wu0f2UKS_fmxu0"
 
     api_service_name = "youtube"
@@ -36,3 +37,4 @@ def scrap_comments(videoID):
         ])
     
     return comments
+

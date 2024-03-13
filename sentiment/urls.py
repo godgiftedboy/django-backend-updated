@@ -3,4 +3,6 @@ from . import views
 
 urlpatterns = [
     path('predict_sentiment', views.predict_sentiment, name="predict"),
+    path('get_history', views.get_history, name="get_history"),
+
 ]

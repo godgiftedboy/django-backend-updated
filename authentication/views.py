@@ -23,6 +23,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 
+
+@csrf_exempt
+def check_login_status(request):
+    user= request.user
+
+    if request.user.is_authenticated:
+        return JsonResponse({"message": f"{user.username} is logged in."})
+    else:
+        return JsonResponse({"message": "User is not logged in."}, status=401)
+
+
 @csrf_exempt
 def signup(request):
     if request.method == "POST":          
@@ -38,32 +49,32 @@ def signup(request):
             return JsonResponse({
                 'status':False,
                 'message': 'Username already exists!!',         
-            })
+            },status=400)
         
         if User.objects.filter(email=email):
           
             return JsonResponse({
                 'status':False,
                 'message': 'Email already registered!',         
-            })
+            },status=400)
         
         if len(username)>10:
             return JsonResponse({
                 'status':False,
                 'message': "Username must be under 10 characters",         
-            })
+            },status=400)
 
         if pass1 != pass2:
             return JsonResponse({
                 'status':False,
                 'message': "Passwords didn't match!",         
-            })
+            },status=400)
 
         if not username.isalnum():
             return JsonResponse({
                 'status':False,
                 'message': "username must be Alpha-Numeric!",         
-            })
+            },status=400)
 
         myuser = User.objects.create_user(username, email, pass1)
         myuser.first_name = fname
@@ -103,7 +114,7 @@ def signup(request):
                 'message': "Your account has been successfully created. We have sent you a confirmation email, please confirm your email in order to activate your account.",         
             })
 
-    return render(request, "authentication/signup.html")
+    # return render(request, "authentication/signup.html")
 
 @csrf_exempt
 def signin(request):
@@ -132,15 +143,16 @@ def signin(request):
                 'message': 'Bad credentials!',
                 'username': username,              
             }           
-            return JsonResponse(response_data)
+            return JsonResponse(response_data,status=400)
             
         
     return JsonResponse({
                 'status':False,
                 'message': 'Internal Server Error!',          
-            })
+            },status=400)
     # return render(request, "authentication/signin.html")
 
+@csrf_exempt
 def signout(request):
     logout(request)
     return JsonResponse({

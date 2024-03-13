@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponse
+from django.shortcuts import render
 from .scrap_comments import scrap_comments
 from .clean_text import clean_text
 
@@ -9,12 +9,17 @@ import pickle
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 
+from .models import UserActivity
 
+from django.contrib.auth.models import User
+@login_required
 @csrf_exempt
 def predict_sentiment(request):
     if request.method == 'POST':
         try:
+            user= request.user
             # Get the JSON data from the request body
             data = json.loads(request.body)
             videoID = data.get('videoID', '')
@@ -24,8 +29,8 @@ def predict_sentiment(request):
             # comment_df.info()
             
 
-        # Load CountVectorizer and model from the pickle file
-            with open('text_classifier.pkl', 'rb') as f:
+            # Load CountVectorizer and model from the pickle file
+            with open('svm_classifier.pkl', 'rb') as f:
                 bow_counts, model1 = pickle.load(f)
             # Preprocess the input sentence
             # If you have a DataFrame df with comments in a 'text' column
@@ -33,7 +38,7 @@ def predict_sentiment(request):
             X_df = bow_counts.transform(comment_df['processed_text'])
 
             # Predict on the DataFrame
-            predicted_labels_df = model1.predict(X_df)
+            predicted_labels_df = model1.predict(X_df)  
 
 
             # Create a DataFrame with labels
@@ -60,8 +65,13 @@ def predict_sentiment(request):
             # Print the counts
             print("\nCount of each class label:")
             print("Positive count:", positive_count)
-            print("Negative count:", negative_count)
             print("Neutral count:", neutral_count)
+            print("Negative count:", negative_count)
+            # user=User()
+            # print(user.username)
+            userActivity =UserActivity(user=user, videoid= videoID,positive_count=positive_count,negative_count=negative_count,neutral_count=neutral_count)
+
+            userActivity.save()
             
             return JsonResponse({
                 'status':True,
@@ -74,9 +84,31 @@ def predict_sentiment(request):
             return JsonResponse({
                     'status':False,
                     'message': 'Invalid JSON data',                        
-                })
+                },status=400)
     else:
         return JsonResponse({
                         'status':False,
                         'message': 'Only POST requests are allowed',                        
-                    })
+                    },status=400)
+
+
+
+def get_history(request):
+     user=request.user
+
+     userActivity =UserActivity.objects.filter(user=user)
+     if len(userActivity)<1:
+         return JsonResponse({},status=400)
+     response=[]
+
+     for userAct in userActivity:
+         
+         response.append({'videoid':userAct.videoid,
+                          'positive':userAct.positive_count,
+                          'negative':userAct.negative_count,
+                          'neutral':userAct.neutral_count,
+                          })         
+     print(userActivity)
+     return JsonResponse({
+         'response':f"{response}"
+     })
