@@ -140,7 +140,7 @@ def signin(request):
         else:
             response_data = {
                 'status':False,
-                'message': 'Bad credentials!',
+                'message': 'Bad credentials or email not verified yet!',
                 'username': username,              
             }           
             return JsonResponse(response_data,status=400)

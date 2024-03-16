@@ -1,9 +1,10 @@
 import googleapiclient.discovery
 import pandas as pd
 
-def scrap_comments(videoID):
+def scrap_comments(videoID,apiKey,numberofcomments):
 
-    dev = "AIzaSyDBD2XxnPKGsYsoZ6RS0Wu0f2UKS_fmxu0"
+    dev = apiKey
+    # "AIzaSyDBD2XxnPKGsYsoZ6RS0Wu0f2UKS_fmxu0"
 
     api_service_name = "youtube"
     api_version = "v3"
@@ -11,11 +12,11 @@ def scrap_comments(videoID):
 
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, developerKey=DEVELOPER_KEY)
-
+    numberofcomments = int(numberofcomments)
     request = youtube.commentThreads().list(
         part="snippet",
         videoId=videoID,
-        maxResults=100
+        maxResults=numberofcomments
     )
 
     comments = []

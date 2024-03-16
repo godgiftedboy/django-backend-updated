@@ -23,7 +23,12 @@ def predict_sentiment(request):
             # Get the JSON data from the request body
             data = json.loads(request.body)
             videoID = data.get('videoID', '')
-            comments= scrap_comments(videoID)
+            apiKey = data.get('apiKey', '')
+            numberofcomments = data.get('numberofcomments', '')
+
+
+
+            comments= scrap_comments(videoID,apiKey,numberofcomments)
             comment_df = pd.DataFrame(comments, columns=['text'])
 
             # comment_df.info()
