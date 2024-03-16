@@ -14,17 +14,21 @@ from django.contrib.auth.decorators import login_required
 from .models import UserActivity
 
 from django.contrib.auth.models import User
-@login_required
+# @login_required
 @csrf_exempt
 def predict_sentiment(request):
     if request.method == 'POST':
         try:
-            user= request.user
+            
             # Get the JSON data from the request body
             data = json.loads(request.body)
             videoID = data.get('videoID', '')
             apiKey = data.get('apiKey', '')
             numberofcomments = data.get('numberofcomments', '')
+            username = data.get('username', '')
+
+            user= User.objects.get(username=username)
+
 
 
 
@@ -97,23 +101,28 @@ def predict_sentiment(request):
                     },status=400)
 
 
+@csrf_exempt
 
 def get_history(request):
-     user=request.user
+     if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data.get('username', '')
 
-     userActivity =UserActivity.objects.filter(user=user)
-     if len(userActivity)<1:
-         return JsonResponse({},status=400)
-     response=[]
+        user= User.objects.get(username=username)
 
-     for userAct in userActivity:
-         
-         response.append({'videoid':userAct.videoid,
-                          'positive':userAct.positive_count,
-                          'negative':userAct.negative_count,
-                          'neutral':userAct.neutral_count,
-                          })         
-     print(userActivity)
-     return JsonResponse({
-         'response':f"{response}"
-     })
+        userActivity =UserActivity.objects.filter(user=user)
+        if len(userActivity)<1:
+            return JsonResponse({},status=400)
+        response=[]
+
+        for userAct in userActivity:
+            
+            response.append({'videoid':userAct.videoid,
+                            'positive':userAct.positive_count,
+                            'negative':userAct.negative_count,
+                            'neutral':userAct.neutral_count,
+                            })         
+        print(userActivity)
+        return JsonResponse({
+            'response':f"{response}"
+        })

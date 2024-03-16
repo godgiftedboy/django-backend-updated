@@ -28,13 +28,9 @@ def scrap_comments(videoID,apiKey,numberofcomments):
     # Get the comments from the response.
     for item in response['items']:
         comment = item['snippet']['topLevelComment']['snippet']
-    #     public = item['snippet']['isPublic']
+
         comments.append([
-            # comment['authorDisplayName'],
-            # comment['publishedAt'],
-            # comment['likeCount'],
             comment['textOriginal'],
-    #         public
         ])
     
     return comments
