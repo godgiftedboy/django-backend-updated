@@ -16,7 +16,8 @@ def scrap_comments(videoID,apiKey,numberofcomments):
     request = youtube.commentThreads().list(
         part="snippet",
         videoId=videoID,
-        maxResults=numberofcomments
+        maxResults=numberofcomments 
+        #limited to 100 comments
     )
 
     comments = []

@@ -109,11 +109,11 @@ def get_history(request):
         username = data.get('username', '')
 
         user= User.objects.get(username=username)
+        response=[]
 
         userActivity =UserActivity.objects.filter(user=user)
         if len(userActivity)<1:
-            return JsonResponse({},status=400)
-        response=[]
+            return JsonResponse({'response':f"{response}"},status=200)
 
         for userAct in userActivity:
             
