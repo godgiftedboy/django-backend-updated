@@ -104,25 +104,23 @@ def predict_sentiment(request):
 @csrf_exempt
 
 def get_history(request):
-     if request.method == 'POST':
+    if request.method == 'POST':
         data = json.loads(request.body)
         username = data.get('username', '')
 
-        user= User.objects.get(username=username)
-        response=[]
+        user = User.objects.get(username=username)
+        response = []
 
-        userActivity =UserActivity.objects.filter(user=user)
-        if len(userActivity)<1:
-            return JsonResponse({'response':f"{response}"},status=200)
+        userActivity = UserActivity.objects.filter(user=user)
+        if len(userActivity) < 1:
+            return JsonResponse({'response': response}, status=200)
 
         for userAct in userActivity:
-            
-            response.append({'videoid':userAct.videoid,
-                            'positive':userAct.positive_count,
-                            'negative':userAct.negative_count,
-                            'neutral':userAct.neutral_count,
-                            })         
-        print(userActivity)
-        return JsonResponse({
-            'response':f"{response}"
-        })
+            response.append({
+                "videoid": userAct.videoid,
+                "positive": userAct.positive_count,
+                "negative": userAct.negative_count,
+                "neutral": userAct.neutral_count,
+            })
+
+        return JsonResponse({'response': response})
