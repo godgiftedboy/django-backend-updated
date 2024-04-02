@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from .models import UserActivity
 
 from django.contrib.auth.models import User
+
 # @login_required
 @csrf_exempt
 def predict_sentiment(request):
@@ -38,16 +39,24 @@ def predict_sentiment(request):
             # comment_df.info()
             
 
-            # Load CountVectorizer and model from the pickle file
-            with open('svm_classifier.pkl', 'rb') as f:
-                bow_counts, model1 = pickle.load(f)
             # Preprocess the input sentence
-            # If you have a DataFrame df with comments in a 'text' column
             comment_df['processed_text'] = comment_df['text'].apply(clean_text)  # Preprocess the text column
-            X_df = bow_counts.transform(comment_df['processed_text'])
+            
+            # Load tfidf vectorizer and model from the pickle file
+            with open('svm_classifier.pkl', 'rb') as f:
+                tf_idf_vect, model1 = pickle.load(f)
+            # If you have a DataFrame df with comments in a 'text' column
+            X_df = tf_idf_vect.transform(comment_df['processed_text'])
 
             # Predict on the DataFrame
             predicted_labels_df = model1.predict(X_df)  
+
+
+            # Load nb_classifier model from the pickle file
+            # with open('naive_bayes_classifier.pkl', 'rb') as f:
+            #     model2 = pickle.load(f)
+            # predicted_labels_df = model2.predict(comment_df['processed_text'])  
+            
 
 
             # Create a DataFrame with labels
