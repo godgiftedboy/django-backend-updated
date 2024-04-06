@@ -41,7 +41,7 @@ def predict_sentiment(request):
 
             # Preprocess the input sentence
             comment_df['processed_text'] = comment_df['text'].apply(clean_text)  # Preprocess the text column
-            
+
             # Load tfidf vectorizer and model from the pickle file
             with open('svm_classifier.pkl', 'rb') as f:
                 tf_idf_vect, model1 = pickle.load(f)
@@ -52,7 +52,7 @@ def predict_sentiment(request):
             predicted_labels_df = model1.predict(X_df)  
 
 
-            # Load nb_classifier model from the pickle file
+            # Load nb_classifier model from the pickle file 
             # with open('naive_bayes_classifier.pkl', 'rb') as f:
             #     model2 = pickle.load(f)
             # predicted_labels_df = model2.predict(comment_df['processed_text'])  
@@ -61,7 +61,7 @@ def predict_sentiment(request):
 
             # Create a DataFrame with labels
             predicted_df = pd.DataFrame({
-                'text': comment_df['text'],  # Assuming you want to include the original text
+                'text': comment_df['text'], 
                 'predicted_label': predicted_labels_df
             })
 
@@ -133,3 +133,28 @@ def get_history(request):
             })
 
         return JsonResponse({'response': response})
+    from django.shortcuts import render
+
+
+from django.http import HttpResponse
+from django.conf import settings
+import os
+
+
+@csrf_exempt
+
+def get_image(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        image_name = data.get('image_name', '')
+        # Construct the path to the image
+        image_path = os.path.join(settings.MEDIA_ROOT, image_name)
+        try:
+            # Open the image file
+            with open(image_path, 'rb') as f:
+                # Return the image as a response
+                return HttpResponse(f.read(), content_type='image/jpeg')  # Adjust content_type as per your image type
+        except IOError:
+            # Handle file not found error
+            return HttpResponse(status=404)
+
