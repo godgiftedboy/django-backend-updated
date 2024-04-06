@@ -27,13 +27,16 @@ def predict_sentiment(request):
             apiKey = data.get('apiKey', '')
             numberofcomments = data.get('numberofcomments', '')
             username = data.get('username', '')
+            model_choice = data.get('model', '') 
 
             user= User.objects.get(username=username)
 
-
-
-
             comments= scrap_comments(videoID,apiKey,numberofcomments)
+
+            single_array = []
+            for inner_list in comments:
+                for comment in inner_list:
+                    single_array.append(comment)
             comment_df = pd.DataFrame(comments, columns=['text'])
 
             # comment_df.info()
@@ -42,14 +45,25 @@ def predict_sentiment(request):
             # Preprocess the input sentence
             comment_df['processed_text'] = comment_df['text'].apply(clean_text)  # Preprocess the text column
 
+            if model_choice == 'model1':
+                with open('svm_classifier.pkl', 'rb') as f:
+                    tf_idf_vect, model = pickle.load(f)
+                X_df = tf_idf_vect.transform(comment_df['processed_text'])
+                predicted_labels_df = model.predict(X_df)
+                predicted_labels_df = predicted_labels_df.tolist()
+            elif model_choice == 'model2':
+                with open('naive_bayes_classifier.pkl', 'rb') as f:
+                    model = pickle.load(f)
+                predicted_labels_df = model.predict(comment_df['processed_text'])
+
             # Load tfidf vectorizer and model from the pickle file
-            with open('svm_classifier.pkl', 'rb') as f:
-                tf_idf_vect, model1 = pickle.load(f)
+            # with open('svm_classifier.pkl', 'rb') as f:
+                # tf_idf_vect, model1 = pickle.load(f)
             # If you have a DataFrame df with comments in a 'text' column
-            X_df = tf_idf_vect.transform(comment_df['processed_text'])
+            # X_df = tf_idf_vect.transform(comment_df['processed_text'])
 
             # Predict on the DataFrame
-            predicted_labels_df = model1.predict(X_df)  
+            # predicted_labels_df = model1.predict(X_df)  
 
 
             # Load nb_classifier model from the pickle file 
@@ -87,7 +101,7 @@ def predict_sentiment(request):
             print("Negative count:", negative_count)
             # user=User()
             # print(user.username)
-            userActivity =UserActivity(user=user, videoid= videoID,positive_count=positive_count,negative_count=negative_count,neutral_count=neutral_count)
+            userActivity =UserActivity(user=user, videoid= videoID,positive_count=positive_count,negative_count=negative_count,neutral_count=neutral_count,model_choice=model_choice)
 
             userActivity.save()
             
@@ -97,6 +111,9 @@ def predict_sentiment(request):
                 'Positive':str(positive_count),
                 'Negative':str(negative_count),
                 'Neutral':str(neutral_count),
+                'model_used':model_choice,
+                'comments': single_array,
+                'predicted_labels': predicted_labels_df
             })          
         except json.JSONDecodeError:           
             return JsonResponse({
@@ -130,6 +147,7 @@ def get_history(request):
                 "positive": userAct.positive_count,
                 "negative": userAct.negative_count,
                 "neutral": userAct.neutral_count,
+                "model_choice": userAct.model_choice
             })
 
         return JsonResponse({'response': response})

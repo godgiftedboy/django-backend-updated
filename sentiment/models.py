@@ -9,6 +9,8 @@ class UserActivity(models.Model):
     positive_count= models.CharField(max_length=100)
     neutral_count= models.CharField(max_length=100)
     negative_count= models.CharField(max_length=100)
+    model_choice= models.CharField(max_length=20, null=True, blank=True)
+
 
     def __str__(self):
         return f'{self.user.username} - {self.videoid}'
