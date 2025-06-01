@@ -6,7 +6,7 @@ from email.message import EmailMessage
 # login with google app password since less secure app of google discontinue fom may 30 2022
 sender = 'sendmail259@gmail.com'
 #password = '123456789hello'
-password='vdqnykmqrbymzimk'
+password='test1234'
 
 def sendmail(emailid,token):
     receiver = emailid
